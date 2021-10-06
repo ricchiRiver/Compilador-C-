@@ -18,7 +18,7 @@ tokens = [
     'LPAREN', 'RPAREN',                            
     'LCOLCH', 'RCOLCH',             
     'LCHAVE', 'RCHAVE',               
-    'COMEN' 
+    'COMEN'
 ] + list(reservadas.values())
 
 TS = {
@@ -36,7 +36,9 @@ def t_ID(t):
     
 def t_NUM(t):
     r'[0-9]+'
-    t.value = int(t.value)
+    if t.value not in TS:
+        TS[t.value] = int(t.value)
+    t.value = (t.value, TS.get(t.value))
     return t
 
 t_ignore = ' \t\n'
@@ -128,7 +130,7 @@ void main(void){
 		i = i + 1;
 	}
 }
-<===>=
+
 '''
     lexer.input(data)
     while True:
