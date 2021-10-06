@@ -22,7 +22,6 @@ tokens = [
 ] + list(reservadas.values())
 
 TS = {
-
 }
 
 def t_ID(t):
@@ -41,19 +40,9 @@ def t_NUM(t):
     t.value = (t.value, TS.get(t.value))
     return t
 
-t_ignore = ' \t\n'
-
 def t_COMEN(t):
-    r'/\*(.*?)\*/(?s)'
+    r'/\*(.*?)(?s)\*/'
     pass
-
-def t_LINHA(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
-
-def coluna(input, token):
-    start = input.rfind('\n', 0, token.lexpos) + 1
-    return (token.lexpos - start) + 1
 
 t_VIRG      = r'\,'
 t_PVIRG     = r'\;'
@@ -76,12 +65,21 @@ t_IGIG      = r'\=\='
 t_DIF       = r'\!\='
 t_IG        = r'\='
 
+t_ignore = ' \t'
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
+def t_error(t):
+    print("Caractere ilegal " + str(t.value[0]) + " na linha " + str(t.lexer.lineno))
+    t.lexer.skip(1)
+
+
 def main():
     lexer = lex.lex()
 
-    data = '''
-    
-    /* Um programa para ordenação por seleção de
+    data = '''/* Um programa para ordenação por seleção de
    uma matriz com dez elementos. */
 
 int x[10];
@@ -129,13 +127,11 @@ void main(void){
 		output (x[i]);
 		i = i + 1;
 	}
-}
-
-'''
+}'''
     lexer.input(data)
     while True:
         tok = lexer.token()
-        for tok in lexer:
-            print(tok)
-
+        if not tok:
+            break      # No more input
+        print(tok)
 main()
