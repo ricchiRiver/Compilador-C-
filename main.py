@@ -1,7 +1,16 @@
 import lex as lexer
 import re
 
-tokens = (
+reservadas = {
+   'else' : 'ELSE',
+   'if' : 'IF',
+   'return' : 'RETURN',
+   'while' : 'WHILE',
+   'int' : 'INT',
+   'void' : 'VOID'
+}
+
+tokens = [
     'ELSE', 'IF', 'RETURN', 'WHILE', 'INT', 'VOID', 
     'ID', 'NUM',
     'RELOP',                #atributos <=, <, >, >=, ==, !=
@@ -12,16 +21,7 @@ tokens = (
     'LCOLCH', 'RCOLCH',             
     'LCHAVE', 'RCHAVE',               
     'COMEN' 
-)
-
-reservados = {
-   'else' : 'ELSE',
-   'if' : 'IF',
-   'return' : 'RETURN',
-   'while' : 'WHILE',
-   'int' : 'INT',
-   'void' : 'VOID'
-}
+] + list(reservadas.values())
 
 TS = {
 
@@ -29,7 +29,7 @@ TS = {
 
 def t_ID(t):
     r'[a-zA-Z]+'
-    t.type = reservados.get(t.value,'ID')
+    t.type = reservadas.get(t.value,'ID')
     t.value = (t.value, symbol_lookup(t.value))
     return t
     
@@ -72,6 +72,3 @@ def main():
         tok = lexer.token()
         for tok in lexer:
             print(tok)
-
-TS["x"] = ("x", "ID")
-print(TS.get("x")[0])
