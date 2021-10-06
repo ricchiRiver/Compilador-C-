@@ -1,5 +1,6 @@
 import lex as lex
 import re
+import sys
 
 reservadas = {
    'else' : 'ELSE',
@@ -12,7 +13,7 @@ reservadas = {
 
 tokens = [ 
     'ID', 'NUM',
-    'MENIG', 'MEN', 'MAI', 'MAIIG', 'IGIG', 'DIF', 'IG',
+    'RELOP',
     'SOMA', 'SUB', 'MULT', 'DIVIS',
     'VIRG', 'PVIRG', 
     'LPAREN', 'RPAREN',                            
@@ -23,6 +24,21 @@ tokens = [
 
 TS = {
 }
+
+t_VIRG      = r'\,'
+t_PVIRG     = r'\;'
+t_LPAREN    = r'\('
+t_RPAREN    = r'\)'
+t_LCOLCH    = r'\['
+t_RCOLCH    = r'\]'
+t_LCHAVE    = r'\{'
+t_RCHAVE    = r'\}'
+t_SOMA      = r'\+'
+t_SUB       = r'\-'
+t_MULT      = r'\*'
+t_DIVIS     = r'\/'
+
+t_ignore = ' \t'
 
 def t_ID(t):
     r'[a-zA-Z]+'
@@ -40,32 +56,27 @@ def t_NUM(t):
     t.value = (t.value, TS.get(t.value))
     return t
 
+def t_RELOP(t):
+    r'\<\=|\<|\>\=|\>|\=|\=\=|\!\='
+    if (t.value == '<'):
+        t.value = (t.value, 'LT')
+    if (t.value == '>'):
+        t.value = (t.value, 'GT')
+    if (t.value == '='):
+        t.value = (t.value, 'EQ')
+    if (t.value == '<='):
+        t.value = (t.value, 'LE')
+    if (t.value == '>='):
+        t.value = (t.value, 'GE')
+    if (t.value == '=='):
+        t.value = (t.value, 'EE')
+    if (t.value == '!='):
+        t.value = (t.value, 'NE')
+    return t
+
 def t_COMEN(t):
     r'/\*(.*?)(?s)\*/'
     pass
-
-t_VIRG      = r'\,'
-t_PVIRG     = r'\;'
-t_LPAREN    = r'\('
-t_RPAREN    = r'\)'
-t_LCOLCH    = r'\['
-t_RCOLCH    = r'\]'
-t_LCHAVE    = r'\{'
-t_RCHAVE    = r'\}'
-t_SOMA      = r'\+'
-t_SUB       = r'\-'
-t_MULT      = r'\*'
-t_DIVIS     = r'\/'
-
-t_MENIG     = r'\<\='
-t_MEN       = r'\<'
-t_MAI       = r'\>'
-t_MAIIG     = r'\>\='
-t_IGIG      = r'\=\='
-t_DIF       = r'\!\='
-t_IG        = r'\='
-
-t_ignore = ' \t'
 
 def t_newline(t):
     r'\n+'
@@ -75,63 +86,17 @@ def t_error(t):
     print("Caractere ilegal " + str(t.value[0]) + " na linha " + str(t.lexer.lineno))
     t.lexer.skip(1)
 
-
 def main():
     lexer = lex.lex()
 
-    data = '''/* Um programa para ordenação por seleção de
-   uma matriz com dez elementos. */
+    print("Insira o codigo. Ao terminar, tecle enter, CTRL+Z (Windows) ou CTRL+D (Linux), e enter mais uma vez")
+    entrada = sys.stdin.read()
+    lexer.input(entrada)
 
-int x[10];
-
-int minloc( int a[], int low, int high ) {
-	int i; 
-	int x; 
-	int k;
-	k = low;
-	x = a[low];
-	i = low + 1;
-	while (i < high) {	
-		if (a[i] < x) {
-			x = a[i];
-			k= i;
-		}
-	i = i + 1;
-	}
-return k;
-}
-
-void sort( int a[], int low, int high ) {
-	int i; int k;
-	i = low;
-	while (i < high-1){
-		int t;
-		k = minloc(a, i, high);
-		t = a[k];
-		a[k] = a[i];
-		a[i] = t;
-		i = i + 1;
-	}
-}
-
-void main(void){
-	int i;
-	i = 0;
-	while (i < 10){
-		x[i] = input();
-		i = i + 1;
-	}
-	sort(x,0,10);
-	i= 0;
-	while (1 < 10){
-		output (x[i]);
-		i = i + 1;
-	}
-}'''
-    lexer.input(data)
     while True:
         tok = lexer.token()
         if not tok:
-            break      # No more input
+            break
         print(tok)
+
 main()
