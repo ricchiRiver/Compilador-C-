@@ -5,8 +5,11 @@ Projeto do curso ACH2087 - Construção de Compiladores (2021) da EACH-USP minis
 Implementação de um compilador da linguagem C- especificada na obra Compilers : principles, techniques, & tools em Python 3.10.0 com a ferramenta PLY (Python Lex-Yacc)
 
 Instruções para execução: 
+    
     -Instale Python 3.10
+    
     -Clone o repositório
+    
     -No terminal, execute o programa com "python main.py"
 
 Desenvolvido por Rodrigo Yuji Ichikawa e Leonardo Britto
