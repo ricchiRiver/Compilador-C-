@@ -25,6 +25,9 @@ tokens = [
 TS = {
 }
 
+erros = [
+]
+
 t_VIRG      = r'\,'
 t_PVIRG     = r'\;'
 t_LPAREN    = r'\('
@@ -51,9 +54,7 @@ def t_ID(t):
     
 def t_NUM(t):
     r'[0-9]+'
-    if t.value not in TS:
-        TS[t.value] = int(t.value)
-    t.value = (t.value, TS.get(t.value))
+    t.value = int(t.value)
     return t
 
 def t_RELOP(t):
@@ -83,7 +84,12 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 def t_error(t):
-    print("Caractere ilegal " + str(t.value[0]) + " na linha " + str(t.lexer.lineno))
+    erros.append((str(t.value[0]), str(t.lexer.lineno)))
+    t.lexer.skip(1)
+
+def t_EOF(t):
+    r'/\*.*(?s)'
+    print("EOF: Comentario nao fechado na linha " + str(t.lexer.lineno))
     t.lexer.skip(1)
 
 def main():
@@ -98,5 +104,10 @@ def main():
         if not tok:
             break
         print(tok)
+    
+    if erros:
+        print(str(len(erros)) + " erros achados.")
+        for e in erros:
+            print("Caractere invalido " + str(e[0]) + " achado na linha " + str(e[1]))
 
 main()
