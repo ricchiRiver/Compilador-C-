@@ -6,20 +6,18 @@ reservadas = {
    'else' : 'ELSE',
    'if' : 'IF',
    'return' : 'RETURN',
-   'while' : 'WHILE',
-   'int' : 'INT',
-   'void' : 'VOID'
+   'while' : 'WHILE'
 }
 
 tokens = [ 
     'ID', 'NUM',
     'RELOP',
-    'SOMA', 'SUB', 'MULT', 'DIVIS',
+    'SOMA', 'MULT',
     'VIRG', 'PVIRG', 
     'LPAREN', 'RPAREN',                            
     'LCOLCH', 'RCOLCH',             
     'LCHAVE', 'RCHAVE',               
-    'COMEN'
+    'COMEN', 'TIPO'
 ] + list(reservadas.values())
 
 TS = {
@@ -36,12 +34,25 @@ t_LCOLCH    = r'\['
 t_RCOLCH    = r'\]'
 t_LCHAVE    = r'\{'
 t_RCHAVE    = r'\}'
-t_SOMA      = r'\+'
-t_SUB       = r'\-'
-t_MULT      = r'\*'
-t_DIVIS     = r'\/'
 
 t_ignore = ' \t'
+
+def t_COMEN(t):
+    r'/\*(.*?)(?s)\*/'
+    pass
+
+def t_EOF(t):
+    r'/\*.*(?s)'
+    print("EOF: Comentario nao fechado na linha " + str(t.lexer.lineno))
+    t.lexer.skip(1)
+
+def t_TIPO(t):
+    r'int|void'
+    if (t.value == 'int'):
+        t.value = (t.value, 'INT')
+    if (t.value == 'void'):
+        t.value = (t.value, 'VOID')
+    return t
 
 def t_ID(t):
     r'[a-zA-Z]+'
@@ -55,6 +66,22 @@ def t_ID(t):
 def t_NUM(t):
     r'[0-9]+'
     t.value = int(t.value)
+    return t
+
+def t_SOMA(t):
+    r'\+|-'
+    if (t.value == '-'):
+        t.value = (t.value, 'SB')
+    if (t.value == '+'):
+        t.value = (t.value,     'SM')
+    return t
+
+def t_MULT(t):
+    r'\*|\/'
+    if (t.value == '*'):
+        t.value = (t.value, 'MT')
+    if (t.value == '/'):
+        t.value = (t.value, 'DV')
     return t
 
 def t_RELOP(t):
@@ -75,21 +102,12 @@ def t_RELOP(t):
         t.value = (t.value, 'NE')
     return t
 
-def t_COMEN(t):
-    r'/\*(.*?)(?s)\*/'
-    pass
-
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
 def t_error(t):
     erros.append((str(t.value[0]), str(t.lexer.lineno)))
-    t.lexer.skip(1)
-
-def t_EOF(t):
-    r'/\*.*(?s)'
-    print("EOF: Comentario nao fechado na linha " + str(t.lexer.lineno))
     t.lexer.skip(1)
 
 def main():
@@ -104,7 +122,7 @@ def main():
         if not tok:
             break
         print(tok)
-    
+
     if erros:
         print(str(len(erros)) + " erros achados.")
         for e in erros:
