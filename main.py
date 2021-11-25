@@ -357,17 +357,25 @@ def p_vazio(p):
     pass
 
 def p_error(p):
-    print("Erro de sintaxe.")
     if not p:
         print("EOF")
         return
-
+    print(colored("Erro de sintaxe na linha: " + str(p.lineno), 'red'))
+    l = []
+    x = ""
     while True:
         tok = parser.token()
-        if not tok or tok.type == 'RCHAVE':
-            break
-    parser.restart()
-
+        if not tok: break
+        if type(tok.value) == tuple:
+            l.append(str(tok.value[0]))
+        else:
+            l.append(str(tok.value))
+        if tok.type == "PVIRG": break
+    for t in l:
+        x = x + " " + t
+    print(colored(x, 'red'))
+    parser.errok()
+    return tok
 
 #-------------------------------------EXEC
 
@@ -381,8 +389,6 @@ def VisNo(no, ger = 0):
     if no.filhos:
         for f in no.filhos:
             VisNo(f, ger + 1)
-
-
 
 lexer = lex.lex()
 parser = yacc.yacc(debug=True)
