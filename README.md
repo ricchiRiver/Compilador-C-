@@ -12,7 +12,7 @@ Instruções para execução:
     
     -No terminal, execute o programa com "python main.py"
 
-Desenvolvido por Rodrigo Yuji Ichikawa e Leonardo Britto
+Desenvolvido por Rodrigo Yuji Ichikawa
 
 PLY: https://github.com/dabeaz/ply
 
