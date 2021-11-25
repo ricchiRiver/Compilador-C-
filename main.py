@@ -10,7 +10,9 @@ reservadas = {
    'else' : 'ELSE',
    'if' : 'IF',
    'return' : 'RETURN',
-   'while' : 'WHILE'
+   'while' : 'WHILE',
+   'int' : 'INT',
+   'void' : 'VOID'
 }
 
 tokens = [ 
@@ -21,7 +23,7 @@ tokens = [
     'LPAREN', 'RPAREN',                            
     'LCOLCH', 'RCOLCH',             
     'LCHAVE', 'RCHAVE',               
-    'COMEN', 'TIPO', 'EQ'
+    'COMEN', 'EQ'
 ] + list(reservadas.values())
 
 TS = {
@@ -50,14 +52,6 @@ def t_EOF(t):
     r'/\*.*(?s)'
     print("EOF: Comentario nao fechado na linha " + str(t.lexer.lineno))
     t.lexer.skip(1)
-
-def t_TIPO(t):
-    r'int|void'
-    if (t.value == 'int'):
-        t.value = (t.value, 'INT')
-    if (t.value == 'void'):
-        t.value = (t.value, 'VOID')
-    return t
 
 def t_ID(t):
     r'[a-zA-Z]+'
@@ -145,26 +139,31 @@ def p_declaracao(p):
     p[0] = p[1]
 
 def p_vardeclaracao_simples(p):
-    'vardeclaracao : TIPO ID PVIRG'
-    TS[(p[2])[0]] = (p[1])[1]
+    'vardeclaracao : tipo ID PVIRG'
+    TS[(p[2])[0]] = p[1]
     #Substitui valor do lexeme ID na TS para 'tipo'
 
     p[0] = No("vardec", (p[2])[0])
     #Cria no e coloca na arvore
 
 def p_vardeclaracao_matriz(p):
-    'vardeclaracao : TIPO ID LCOLCH NUM RCOLCH PVIRG'
-    TS[(p[2])[0]] = ((p[1])[1], p[4])
+    'vardeclaracao : tipo ID LCOLCH NUM RCOLCH PVIRG'
+    TS[(p[2])[0]] = (p[1], p[4])
     #Substitui valor do lexeme ID na TS para ( 'tipo', 'numero' )
 
     p[0] = No("matdec", (p[2])[0] + '[' + str(p[4]) + ']')
     #Cria no e coloca na arvore
 
-def p_fundeclaracao(p):
-    'fundeclaracao : TIPO ID LPAREN params RPAREN compostodecl'
-    TS[(p[2])[0]] = (p[1])[1]
+def p_tipo(p):
+    '''tipo : INT
+            | VOID'''
+    p[0] = p[1]
 
-    p[0] = No("fundec", (p[1])[0] + ' ' + (p[2])[0] + "()")
+def p_fundeclaracao(p):
+    'fundeclaracao : tipo ID LPAREN params RPAREN compostodecl'
+    TS[(p[2])[0]] = p[1]
+
+    p[0] = No("fundec", p[1] + ' ' + (p[2])[0] + "()")
     if p[4]:
         p[0].filhos.append(p[4])
     p[0].filhos.append(p[6])
@@ -173,9 +172,11 @@ def p_params_lista(p):
     'params : paramlista'
     p[0] = No("params", filhos = p[1])
 
-def p_params_vazio(p):
-    'params : empty'
-    p[0] = None
+def p_params_void(p):
+    'params : VOID'
+    p[0] = No("params")
+    temp = No("VOID")
+    p[0].filhos.append(temp)
 
 def p_paramlista(p):
     '''paramlista : paramlista VIRG param
@@ -188,13 +189,13 @@ def p_paramlista(p):
         p[0].append(p[1])
 
 def p_param(p):
-    '''param : TIPO ID
-             | TIPO ID LCOLCH RCOLCH'''
+    '''param : tipo ID
+             | tipo ID LCOLCH RCOLCH'''
     if (len(p) == 3):
-        TS[(p[2])[0]] = (p[1])[1]
+        TS[(p[2])[0]] = p[1]
         p[0] = No("vardec", (p[2])[0])
     else:
-        TS[(p[2])[0]] = ((p[1])[0], 0)
+        TS[(p[2])[0]] = (p[1], 0)
         p[0] = No("matdec", (p[2])[0] + "[]")
 
 def p_compostodecl(p):
@@ -391,6 +392,8 @@ def VisNo(no, ger = 0):
             VisNo(f, ger + 1)
 
 lexer = lex.lex()
+TS["input"] = "int"
+TS["output"] = "void"
 parser = yacc.yacc(errorlog=yacc.NullLogger())
 
 print("Insira o codigo. Ao terminar, tecle enter, CTRL+Z (Windows) ou CTRL+D (Linux), e enter mais uma vez")
