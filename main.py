@@ -383,15 +383,15 @@ def VisNo(no, ger = 0):
     if no == None:
         return
     if no.desc:
-        print((colored("|", 'grey') + "    ") * ger + no.tipo + ", " + no.desc)
+        print((colored("|", 'green') + "    ") * ger + no.tipo + ", " + no.desc)
     else:
-        print((colored("|", 'grey') + "    ") * ger + no.tipo)
+        print((colored("|", 'green') + "    ") * ger + no.tipo)
     if no.filhos:
         for f in no.filhos:
             VisNo(f, ger + 1)
 
 lexer = lex.lex()
-parser = yacc.yacc(debug=True)
+parser = yacc.yacc(errorlog=yacc.NullLogger())
 
 print("Insira o codigo. Ao terminar, tecle enter, CTRL+Z (Windows) ou CTRL+D (Linux), e enter mais uma vez")
 entrada = sys.stdin.read()
